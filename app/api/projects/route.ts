@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch projects where user is owner or member
+    // Fetch all projects (RLS will automatically filter to owned/member projects)
     const { data: projects, error: fetchError } = await supabase
       .from("projects")
       .select(`
@@ -24,13 +24,8 @@ export async function GET(request: NextRequest) {
         github_url,
         bucket_name,
         bucket_url,
-        created_at,
-        project_members!inner(
-          user_id,
-          role
-        )
+        created_at
       `)
-      .or(`user_id.eq.${user.id},project_members.user_id.eq.${user.id}`)
       .order("created_at", { ascending: false });
 
     if (fetchError) {
@@ -41,23 +36,30 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Transform the data to include role information
-    const projectsWithRole = projects?.map((project) => {
-      const isOwner = project.user_id === user.id;
-      const memberRole = project.project_members?.find(
-        (m: { user_id: string }) => m.user_id === user.id
-      )?.role;
+    // Fetch user's role for each project
+    const projectsWithRole = await Promise.all(
+      (projects || []).map(async (project) => {
+        const isOwner = project.user_id === user.id;
 
-      return {
-        project_id: project.project_id,
-        github_url: project.github_url,
-        bucket_name: project.bucket_name,
-        bucket_url: project.bucket_url,
-        created_at: project.created_at,
-        is_owner: isOwner,
-        role: isOwner ? "owner" : memberRole,
-      };
-    });
+        // Get user's role from project_members
+        const { data: memberData } = await supabase
+          .from("project_members")
+          .select("role")
+          .eq("project_id", project.project_id)
+          .eq("user_id", user.id)
+          .single();
+
+        return {
+          project_id: project.project_id,
+          github_url: project.github_url,
+          bucket_name: project.bucket_name,
+          bucket_url: project.bucket_url,
+          created_at: project.created_at,
+          is_owner: isOwner,
+          role: memberData?.role || (isOwner ? "owner" : "member"),
+        };
+      })
+    );
 
     return NextResponse.json({
       success: true,
