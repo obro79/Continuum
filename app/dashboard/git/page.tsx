@@ -54,6 +54,13 @@ export default function GitPage() {
     fetchGitData(selectedProject);
   }, [selectedProject]);
 
+  useEffect(() => {
+    if (viewMode === 'all') {
+      fetchAllBranches();
+    } else {
+      fetchCommits(selectedBranch);
+    }
+  }, [viewMode, selectedBranch]);
 
   const fetchAllBranches = async () => {
     setLoading(true);
@@ -117,43 +124,16 @@ export default function GitPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Git Status</h2>
-          <p className="text-muted-foreground">
-            Visualizing Git commits with Claude conversation contexts
-          </p>
-        </div>
-        <div className="flex gap-3 items-center">
+      <div>
+        <h2 className="text-2xl font-semibold tracking-tight">Git Status</h2>
+        <p className="text-muted-foreground">
+          Visualizing Git commits with Claude conversation contexts
+        </p>
+        <div className="mt-4">
           <ProjectDropdown
             selectedProject={selectedProject}
             onProjectSelect={setSelectedProject}
           />
-          <button
-            onClick={() => {
-              if (selectedProject) {
-                // Re-trigger the project data fetch
-                const params = new URLSearchParams({
-                  project_id: selectedProject.project_id,
-                  github_url: selectedProject.github_url,
-                  supabase_bucket: selectedProject.bucket_url,
-                });
-                setIsLoading(true);
-                setCommits([]);
-                fetch(`/api/git-data?${params}`)
-                  .then(res => res.json())
-                  .then(data => {
-                    if (data.commits) setCommits(data.commits);
-                  })
-                  .catch(err => console.error('Error refreshing:', err))
-                  .finally(() => setIsLoading(false));
-              }
-            }}
-            disabled={!selectedProject}
-            className="px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Refresh
-          </button>
         </div>
       </div>
       {/* Full height graph container - takes entire content area */}
@@ -162,7 +142,7 @@ export default function GitPage() {
           <CardHeader className="pb-2">
             <CardTitle>Git + Claude Context Visualization</CardTitle>
             <CardDescription>
-              {(loading || isLoading) ? 'Loading commits...' : error ? 'Error loading commits' : selectedProject ? `Showing ${commits.length} commits from ${selectedProject.bucket_name}` : 'Select a project to view commits'}
+              {(loading || isLoading) ? 'Loading commits...' : error ? 'Error loading commits' : `Showing ${commits.length} commits ${viewMode === 'all' ? 'from all branches' : `from ${selectedBranch}`}`}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-1 p-0">
