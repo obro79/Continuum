@@ -1,0 +1,79 @@
+"use client";
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CodeBlock } from "@/components/ui/code-block";
+import { ExternalLink, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+interface ProjectCardProps {
+  projectId: string;
+  githubUrl: string;
+  bucketName: string;
+  bucketUrl: string;
+  createdAt: string;
+  onDelete?: (projectId: string) => void;
+}
+
+export function ProjectCard({
+  projectId,
+  githubUrl,
+  bucketName,
+  bucketUrl,
+  createdAt,
+  onDelete,
+}: ProjectCardProps) {
+  const handleDelete = () => {
+    if (onDelete && confirm('Are you sure you want to delete this project?')) {
+      onDelete(projectId);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <CardTitle className="flex items-center gap-2">
+              <a
+                href={githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline flex items-center gap-1"
+              >
+                {githubUrl.replace('https://github.com/', '')}
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </CardTitle>
+            <CardDescription>
+              Created {new Date(createdAt).toLocaleDateString()}
+            </CardDescription>
+          </div>
+          {onDelete && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleDelete}
+              className="h-8 w-8 text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">Delete project</span>
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <p className="text-sm font-medium mb-1">Bucket Name</p>
+          <p className="text-sm text-muted-foreground font-mono">{bucketName}</p>
+        </div>
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Setup Commands</p>
+          <div className="space-y-2">
+            <CodeBlock code="cc-init" />
+            <CodeBlock code={`cc-sync ${bucketUrl}`} />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
