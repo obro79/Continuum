@@ -25,8 +25,8 @@ export default function GitPage() {
       setIsLoading(true);
       try {
         const params = new URLSearchParams({
-          project_id: project.id,
-          repo_link: project.github_link,
+          project_id: project.project_id,
+          github_url: project.github_url,
           supabase_bucket: project.bucket_url,
         });
 

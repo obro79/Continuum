@@ -36,11 +36,13 @@ export async function GET() {
 
     // Transform to match the expected format
     const transformedProjects = projects.map(p => ({
-      id: p.project_id,
-      name: p.github_url?.split('/').pop() || 'Unknown Project', // Extract repo name from URL
-      repo_link: p.github_url,
-      bucket_link: p.bucket_url || p.bucket_name,
-      created_at: p.created_at
+      project_id: p.project_id,
+      github_url: p.github_url,
+      bucket_name: p.bucket_name,
+      bucket_url: p.bucket_url,
+      created_at: p.created_at,
+      is_owner: true, // User is owner of their own projects
+      role: 'owner'
     }));
 
     return NextResponse.json({ projects: transformedProjects });

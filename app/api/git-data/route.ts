@@ -4,9 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const projectId = searchParams.get('project_id');
-    const repoLink = searchParams.get('repo_link');
-    const bucketLink = searchParams.get('bucket_link');
+    const repoLink = searchParams.get('github_url');
+    const bucketLink = searchParams.get('supabase_bucket');
 
     if (!repoLink || !bucketLink) {
       return NextResponse.json(

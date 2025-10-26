@@ -53,7 +53,7 @@ export function ProjectDropdown({ selectedProject, onProjectSelect }: ProjectDro
           <div className="flex items-center gap-2">
             <FolderGit2 className="h-4 w-4" />
             <span className="truncate">
-              {isLoading ? "Loading..." : selectedProject?.name || "Select a project"}
+              {isLoading ? "Loading..." : selectedProject?.bucket_name || "Select a project"}
             </span>
           </div>
           <ChevronDown className="h-4 w-4 opacity-50" />
@@ -67,14 +67,14 @@ export function ProjectDropdown({ selectedProject, onProjectSelect }: ProjectDro
         ) : (
           projects.map((project) => (
             <DropdownMenuItem
-              key={project.id}
+              key={project.project_id}
               onClick={() => onProjectSelect(project)}
               className="cursor-pointer"
             >
               <div className="flex flex-col gap-1 w-full">
-                <span className="font-medium">{project.name}</span>
+                <span className="font-medium">{project.bucket_name}</span>
                 <span className="text-xs text-muted-foreground truncate">
-                  {project.github_link}
+                  {project.github_url}
                 </span>
               </div>
             </DropdownMenuItem>

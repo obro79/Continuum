@@ -85,8 +85,9 @@ SUPABASE_BUCKET=${bucketName}`;
         <div className="space-y-2">
           <p className="text-sm font-medium">Setup Commands</p>
           <div className="space-y-2">
-            <CodeBlock code="cc-init" />
-            <CodeBlock code={`cc-sync ${bucketUrl}`} />
+            {["cc-init", `cc-sync ${bucketUrl}`].map((cmd, idx) => (
+              <CodeBlock key={idx} code={cmd} />
+            ))}
           </div>
         </div>
       </CardContent>
