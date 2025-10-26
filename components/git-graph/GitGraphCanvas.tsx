@@ -60,7 +60,7 @@ export function GitGraphCanvas({
     };
 
     // Simple approximation for viewport bounds
-    const maxLanes = Math.min(50, new Set(commits.map(c => c.branches?.[0] || 'main')).size);
+    const maxLanes = Math.min(50, new Set(commits.map(c => c.branches?.[0] || 'main')).size + 10);
     return {
       minX: 0,
       minY: 0,
