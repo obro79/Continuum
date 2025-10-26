@@ -56,10 +56,11 @@ export async function GET() {
       allProjects.set(project.id, project);
     });
 
-    // Add member projects
+    // Add member projects (projects comes as an object from the join, not an array)
     memberProjects?.forEach(mp => {
-      if (mp.projects) {
-        allProjects.set(mp.projects.id, mp.projects);
+      const project = mp.projects as any;
+      if (project && !Array.isArray(project)) {
+        allProjects.set(project.id, project);
       }
     });
 
