@@ -15,66 +15,35 @@ export async function GET() {
       return NextResponse.json({ projects: mockProjects });
     }
 
-    // Fetch projects where user is either owner or member
-    // Using a join through project_members table
-    const { data: memberProjects, error: memberError } = await supabase
-      .from('project_members')
-      .select(`
-        project_id,
-        projects (
-          id,
-          name,
-          description,
-          repo_link,
-          bucket_link,
-          created_at
-        )
-      `)
-      .eq('user_id', user.id);
+    // Fetch projects for the authenticated user
+    const { data: projects, error } = await supabase
+      .from('projects')
+      .select('project_id, user_id, github_url, bucket_name, bucket_url, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
 
-    if (memberError) {
-      console.error('Error fetching member projects:', memberError);
+    if (error) {
+      console.error('Error fetching projects:', error);
       console.log('Using mock data instead');
       return NextResponse.json({ projects: mockProjects });
     }
 
-    // Also fetch projects where user is the owner
-    const { data: ownedProjects, error: ownerError } = await supabase
-      .from('projects')
-      .select('id, name, description, repo_link, bucket_link, created_at')
-      .eq('owner_id', user.id);
-
-    if (ownerError) {
-      console.error('Error fetching owned projects:', ownerError);
-    }
-
-    // Combine and deduplicate projects
-    const allProjects = new Map();
-
-    // Add owned projects
-    ownedProjects?.forEach(project => {
-      allProjects.set(project.id, project);
-    });
-
-    // Add member projects (projects comes as an object from the join, not an array)
-    memberProjects?.forEach(mp => {
-      const project = mp.projects as any;
-      if (project && !Array.isArray(project)) {
-        allProjects.set(project.id, project);
-      }
-    });
-
-    const projects = Array.from(allProjects.values()).sort((a, b) =>
-      a.name.localeCompare(b.name)
-    );
-
     // If no projects found, return mock data
-    if (projects.length === 0) {
+    if (!projects || projects.length === 0) {
       console.log('No projects found in database, using mock data');
       return NextResponse.json({ projects: mockProjects });
     }
 
-    return NextResponse.json({ projects });
+    // Transform to match the expected format
+    const transformedProjects = projects.map(p => ({
+      id: p.project_id,
+      name: p.github_url?.split('/').pop() || 'Unknown Project', // Extract repo name from URL
+      repo_link: p.github_url,
+      bucket_link: p.bucket_url || p.bucket_name,
+      created_at: p.created_at
+    }));
+
+    return NextResponse.json({ projects: transformedProjects });
   } catch (error) {
     console.error('Unexpected error:', error);
     console.log('Using mock data due to error');

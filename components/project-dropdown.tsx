@@ -59,7 +59,7 @@ export function ProjectDropdown({ selectedProject, onProjectSelect }: ProjectDro
           <ChevronDown className="h-4 w-4 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[250px] bg-background/100 border-2 shadow-lg z-50 backdrop-blur-none">
+      <DropdownMenuContent align="start" className="w-[250px] bg-white border-2 shadow-lg z-50 backdrop-blur-none">
         <DropdownMenuLabel>Your Projects</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {projects.length === 0 ? (

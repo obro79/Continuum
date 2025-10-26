@@ -27,7 +27,7 @@ export default function GitPage() {
         const params = new URLSearchParams({
           project_id: project.id,
           repo_link: project.repo_link,
-          bucket_link: project.bucket_link,
+          supabase_bucket: project.supabase_bucket,
         });
 
         const response = await fetch(`/api/git-data?${params}`);
