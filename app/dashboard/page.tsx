@@ -18,6 +18,7 @@ interface Project {
 export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   const fetchProjects = async () => {
     try {
@@ -97,6 +98,7 @@ export default function DashboardPage() {
               bucketName={project.bucket_name}
               bucketUrl={project.bucket_url}
               createdAt={project.created_at}
+              supabaseUrl={supabaseUrl}
               onDelete={project.is_owner ? handleDeleteProject : undefined}
             />
           ))}

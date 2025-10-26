@@ -11,6 +11,7 @@ interface ProjectCardProps {
   bucketName: string;
   bucketUrl: string;
   createdAt: string;
+  supabaseUrl?: string;
   onDelete?: (projectId: string) => void;
 }
 
@@ -20,6 +21,7 @@ export function ProjectCard({
   bucketName,
   bucketUrl,
   createdAt,
+  supabaseUrl,
   onDelete,
 }: ProjectCardProps) {
   const handleDelete = () => {
@@ -27,6 +29,11 @@ export function ProjectCard({
       onDelete(projectId);
     }
   };
+
+  // Environment variables for user's local .env.local
+  const envVars = `SUPABASE_URL=${supabaseUrl || 'your-supabase-url'}
+SUPABASE_SERVICE_KEY=your-service-role-key
+SUPABASE_BUCKET=${bucketName}`;
 
   return (
     <Card>
@@ -66,6 +73,15 @@ export function ProjectCard({
           <p className="text-sm font-medium mb-1">Bucket Name</p>
           <p className="text-sm text-muted-foreground font-mono">{bucketName}</p>
         </div>
+
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Environment Variables (.env.local)</p>
+          <CodeBlock code={envVars} />
+          <p className="text-xs text-muted-foreground">
+            Add these to your repository's .env.local file. Get your service role key from Supabase Dashboard → Settings → API.
+          </p>
+        </div>
+
         <div className="space-y-2">
           <p className="text-sm font-medium">Setup Commands</p>
           <div className="space-y-2">
