@@ -1,68 +1,38 @@
-# Supabase Schema - MVP
+-- COMPLETE DATABASE FIX
+-- This script fixes all issues and sets up the database correctly
+-- Run this ONCE in your Supabase SQL Editor
 
-Minimal schema for Claude Code context visualization with public read access.
+-- ============================================================================
+-- STEP 1: Drop all existing policies and tables to start fresh
+-- ============================================================================
 
-## Schema
+DROP POLICY IF EXISTS "Users can read members of their projects" ON project_members;
+DROP POLICY IF EXISTS "Project owners can add members" ON project_members;
+DROP POLICY IF EXISTS "Project owners can remove members" ON project_members;
+DROP POLICY IF EXISTS "Users can read projects they own or are members of" ON projects;
+DROP POLICY IF EXISTS "Users can insert own projects" ON projects;
+DROP POLICY IF EXISTS "Only owners can delete projects" ON projects;
+DROP POLICY IF EXISTS "Users can delete own contexts" ON contexts;
+DROP POLICY IF EXISTS "Users can insert contexts" ON contexts;
+DROP POLICY IF EXISTS "Public read for authenticated users" ON contexts;
+DROP POLICY IF EXISTS "Users can update own profile" ON users;
+DROP POLICY IF EXISTS "Users can read own profile" ON users;
 
-### Users
-```sql
+DROP FUNCTION IF EXISTS is_project_member(UUID, UUID);
+DROP FUNCTION IF EXISTS handle_new_user();
+
+DROP TABLE IF EXISTS project_members CASCADE;
+DROP TABLE IF EXISTS projects CASCADE;
+DROP TABLE IF EXISTS contexts CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+-- ============================================================================
+-- STEP 2: Create tables with correct schema
+-- ============================================================================
+
+-- Users table (synced with auth.users)
 CREATE TABLE users (
-  id UUID PRIMARY KEY REFERENCES auth.users(id),
-  email TEXT UNIQUE NOT NULL,
-  display_name TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
-### Contexts
-```sql
-CREATE TABLE contexts (
-  context_id TEXT PRIMARY KEY,
-  repository_path TEXT NOT NULL,
-  repository_name TEXT,
-  commit_sha TEXT NOT NULL,
-  parent_commit_sha TEXT,
-  author_email TEXT,
-  total_messages INTEGER,
-  session_count INTEGER,
-  new_messages_since_parent INTEGER,
-  jsonl_data TEXT NOT NULL,
-  created_by UUID REFERENCES users(id),
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
-### Projects
-```sql
-CREATE TABLE projects (
-  project_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  github_url TEXT NOT NULL UNIQUE,
-  bucket_name TEXT NOT NULL UNIQUE,
-  bucket_url TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
-### Project Members
-```sql
-CREATE TABLE project_members (
-  project_id UUID NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  role TEXT NOT NULL CHECK (role IN ('owner', 'member')),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  PRIMARY KEY (project_id, user_id)
-);
-```
-
-## Complete Migration
-
-Copy-paste this into Supabase SQL Editor:
-
-```sql
--- Users table
-CREATE TABLE users (
-  id UUID PRIMARY KEY REFERENCES auth.users(id),
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT UNIQUE NOT NULL,
   display_name TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
@@ -80,7 +50,7 @@ CREATE TABLE contexts (
   session_count INTEGER,
   new_messages_since_parent INTEGER,
   jsonl_data TEXT NOT NULL,
-  created_by UUID REFERENCES users(id),
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -103,7 +73,10 @@ CREATE TABLE project_members (
   PRIMARY KEY (project_id, user_id)
 );
 
--- Indexes
+-- ============================================================================
+-- STEP 3: Create indexes
+-- ============================================================================
+
 CREATE INDEX idx_contexts_commit_sha ON contexts(commit_sha);
 CREATE INDEX idx_contexts_repository_path ON contexts(repository_path);
 CREATE INDEX idx_contexts_author_email ON contexts(author_email);
@@ -115,7 +88,11 @@ CREATE INDEX idx_projects_created_at ON projects(created_at DESC);
 CREATE INDEX idx_project_members_user_id ON project_members(user_id);
 CREATE INDEX idx_project_members_project_id ON project_members(project_id);
 
--- Auto-sync auth.users to users table (CRITICAL!)
+-- ============================================================================
+-- STEP 4: Create trigger to auto-sync auth.users to users table
+-- ============================================================================
+
+-- Function to handle new user creation
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -130,18 +107,29 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- Trigger that fires when a new user is created in auth.users
 CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION handle_new_user();
 
--- Backfill existing auth users
+-- ============================================================================
+-- STEP 5: Backfill existing auth users into users table
+-- ============================================================================
+
 INSERT INTO public.users (id, email, display_name, created_at)
-SELECT id, email, COALESCE(raw_user_meta_data->>'display_name', email), created_at
+SELECT
+  id,
+  email,
+  COALESCE(raw_user_meta_data->>'display_name', email),
+  created_at
 FROM auth.users
 ON CONFLICT (id) DO NOTHING;
 
--- Helper function to avoid RLS recursion
+-- ============================================================================
+-- STEP 6: Create helper function to avoid RLS recursion
+-- ============================================================================
+
 CREATE OR REPLACE FUNCTION is_project_member(project_uuid UUID, user_uuid UUID)
 RETURNS BOOLEAN
 LANGUAGE SQL
@@ -156,11 +144,18 @@ AS $$
   );
 $$;
 
--- Enable RLS
+-- ============================================================================
+-- STEP 7: Enable Row Level Security
+-- ============================================================================
+
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contexts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE project_members ENABLE ROW LEVEL SECURITY;
+
+-- ============================================================================
+-- STEP 8: Create RLS Policies
+-- ============================================================================
 
 -- Users policies
 CREATE POLICY "Users can read own profile"
@@ -175,7 +170,7 @@ CREATE POLICY "Users can insert own profile"
   ON users FOR INSERT
   WITH CHECK (auth.uid() = id);
 
--- Contexts policies (public read for authenticated users)
+-- Contexts policies
 CREATE POLICY "Public read for authenticated users"
   ON contexts FOR SELECT
   USING (auth.role() = 'authenticated');
@@ -234,21 +229,7 @@ CREATE POLICY "Project owners can remove members"
       AND projects.user_id = auth.uid()
     )
   );
-```
 
-## Notes
-
-- **CRITICAL**: The `handle_new_user()` trigger automatically syncs `auth.users` to `users` table
-- Run the backfill INSERT if you have existing authenticated users
-- Any authenticated user can read all contexts
-- Users can only insert/delete their own contexts
-- Users can read projects they own or are members of
-- Only project owners can delete projects and manage members
-- Only project owners can view the members list
-- Uses security definer function `is_project_member()` to avoid RLS recursion
-- Project members get read and write access to the associated Supabase bucket
-- Fetch Git commit data via GitHub API using `commit_sha`
-
-## Database Setup
-
-Run `COMPLETE_DATABASE_FIX.sql` in Supabase SQL Editor for a fresh setup, or follow the migration in this file.
+-- ============================================================================
+-- Done! Your database is now properly configured.
+-- ============================================================================
