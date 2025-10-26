@@ -1,3 +1,5 @@
+'use client';
+
 import { GitGraphVisualization } from '@/components/git-graph/GitGraphVisualization';
 import { mockGitCommits } from '@/lib/mock-data/git-graph';
 

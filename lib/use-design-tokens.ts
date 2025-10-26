@@ -53,14 +53,11 @@ export function createStyles(
 /**
  * Get responsive spacing value
  * @example
- * getSpacing('lg') // returns '16px'
  * getSpacing(4) // returns '16px'
  */
-export function getSpacing(size: keyof typeof designTokens.spacing | number): string {
-  if (typeof size === 'number') {
-    return designTokens.spacing[size as keyof typeof designTokens.spacing] || '0';
-  }
-  return designTokens.spacing[size] || '0';
+export function getSpacing(size: number): string {
+  const spacingValue = designTokens.spacing[size as keyof typeof designTokens.spacing];
+  return (typeof spacingValue === 'string' ? spacingValue : null) || '0';
 }
 
 /**
