@@ -28,6 +28,7 @@ export default function GitPage() {
 
     async function fetchGitData(project: Project) {
       setIsLoading(true);
+      setCommits([]); // Clear old commits immediately to prevent flash
       try {
         const params = new URLSearchParams({
           project_id: project.project_id,
@@ -185,11 +186,11 @@ export default function GitPage() {
           <CardHeader className="pb-2">
             <CardTitle>Git + Claude Context Visualization</CardTitle>
             <CardDescription>
-              {loading ? 'Loading commits...' : error ? 'Error loading commits' : `Showing ${commits.length} commits ${viewMode === 'all' ? 'from all branches' : `from ${selectedBranch}`}`}
+              {(loading || isLoading) ? 'Loading commits...' : error ? 'Error loading commits' : `Showing ${commits.length} commits ${viewMode === 'all' ? 'from all branches' : `from ${selectedBranch}`}`}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-1 p-0">
-            {loading ? (
+            {(loading || isLoading) ? (
               <div className="flex items-center justify-center h-full">
                 <p className="text-muted-foreground">Loading commits...</p>
               </div>
