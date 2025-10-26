@@ -1,0 +1,503 @@
+{
+  "colors": {
+    "background": {
+      "primary": {
+        "value": "#F5F3F0",
+        "type": "color",
+        "description": "Main cream/beige background - Claude Code UI"
+      },
+      "secondary": {
+        "value": "#E8E5E0",
+        "type": "color",
+        "description": "Slightly darker beige for containers"
+      },
+      "tertiary": {
+        "value": "#FFFFFF",
+        "type": "color",
+        "description": "Pure white for inputs/cards"
+      }
+    },
+    "text": {
+      "primary": {
+        "value": "#1A1A1A",
+        "type": "color",
+        "description": "Near black for main text"
+      },
+      "secondary": {
+        "value": "#6B6B6B",
+        "type": "color",
+        "description": "Medium gray for secondary text"
+      },
+      "tertiary": {
+        "value": "#999999",
+        "type": "color",
+        "description": "Light gray for placeholder text"
+      },
+      "muted": {
+        "value": "#767676",
+        "type": "color",
+        "description": "Muted text color"
+      }
+    },
+    "accent": {
+      "coral": {
+        "value": "#E8A598",
+        "type": "color",
+        "description": "Coral/salmon pink for primary actions"
+      },
+      "coralHover": {
+        "value": "#E09486",
+        "type": "color",
+        "description": "Coral hover state"
+      },
+      "coralActive": {
+        "value": "#D88374",
+        "type": "color",
+        "description": "Coral active state"
+      },
+      "orange": {
+        "value": "#D97757",
+        "type": "color",
+        "description": "Orange for icons/decorative elements"
+      },
+      "orangeDark": {
+        "value": "#8B4513",
+        "type": "color",
+        "description": "Dark orange for emphasis"
+      }
+    },
+    "border": {
+      "default": {
+        "value": "#D9D6D1",
+        "type": "color",
+        "description": "Light gray borders"
+      },
+      "subtle": {
+        "value": "#E8E5E0",
+        "type": "color",
+        "description": "Very subtle borders"
+      },
+      "input": {
+        "value": "#D9D6D1",
+        "type": "color",
+        "description": "Input field borders"
+      }
+    },
+    "state": {
+      "hover": {
+        "value": "rgba(0, 0, 0, 0.04)",
+        "type": "color",
+        "description": "Hover state overlay"
+      },
+      "active": {
+        "value": "rgba(0, 0, 0, 0.08)",
+        "type": "color",
+        "description": "Active state overlay"
+      },
+      "focus": {
+        "value": "rgba(232, 165, 152, 0.2)",
+        "type": "color",
+        "description": "Focus state ring"
+      },
+      "disabled": {
+        "value": "rgba(107, 107, 107, 0.5)",
+        "type": "color",
+        "description": "Disabled state"
+      }
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "brand": {
+        "value": "Georgia, \"Times New Roman\", serif",
+        "type": "fontFamily",
+        "description": "Serif font for branding"
+      },
+      "sans": {
+        "value": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Roboto\", \"Helvetica\", \"Arial\", sans-serif",
+        "type": "fontFamily",
+        "description": "System sans-serif stack"
+      },
+      "mono": {
+        "value": "\"SF Mono\", \"Monaco\", \"Cascadia Code\", \"Courier New\", monospace",
+        "type": "fontFamily",
+        "description": "Monospace font for code"
+      }
+    },
+    "fontSize": {
+      "xs": {
+        "value": "12px",
+        "type": "fontSize",
+        "description": "Small labels, badges"
+      },
+      "sm": {
+        "value": "14px",
+        "type": "fontSize",
+        "description": "Body text, empty states"
+      },
+      "base": {
+        "value": "16px",
+        "type": "fontSize",
+        "description": "Input text, regular content"
+      },
+      "lg": {
+        "value": "18px",
+        "type": "fontSize",
+        "description": "Subheadings"
+      },
+      "xl": {
+        "value": "20px",
+        "type": "fontSize",
+        "description": "Headings"
+      },
+      "2xl": {
+        "value": "24px",
+        "type": "fontSize",
+        "description": "Logo, page titles"
+      },
+      "3xl": {
+        "value": "30px",
+        "type": "fontSize",
+        "description": "Large headings"
+      },
+      "4xl": {
+        "value": "36px",
+        "type": "fontSize",
+        "description": "Hero text"
+      }
+    },
+    "lineHeight": {
+      "tight": {
+        "value": "1.25",
+        "type": "lineHeight"
+      },
+      "normal": {
+        "value": "1.5",
+        "type": "lineHeight"
+      },
+      "relaxed": {
+        "value": "1.75",
+        "type": "lineHeight"
+      },
+      "loose": {
+        "value": "2",
+        "type": "lineHeight"
+      }
+    },
+    "fontWeight": {
+      "normal": {
+        "value": "400",
+        "type": "fontWeight"
+      },
+      "medium": {
+        "value": "500",
+        "type": "fontWeight"
+      },
+      "semibold": {
+        "value": "600",
+        "type": "fontWeight"
+      },
+      "bold": {
+        "value": "700",
+        "type": "fontWeight"
+      }
+    },
+    "letterSpacing": {
+      "tight": {
+        "value": "-0.01em",
+        "type": "letterSpacing"
+      },
+      "normal": {
+        "value": "0",
+        "type": "letterSpacing"
+      },
+      "wide": {
+        "value": "0.01em",
+        "type": "letterSpacing"
+      },
+      "wider": {
+        "value": "0.02em",
+        "type": "letterSpacing"
+      }
+    }
+  },
+  "spacing": {
+    "0": {
+      "value": "0",
+      "type": "spacing"
+    },
+    "1": {
+      "value": "4px",
+      "type": "spacing"
+    },
+    "2": {
+      "value": "8px",
+      "type": "spacing"
+    },
+    "3": {
+      "value": "12px",
+      "type": "spacing"
+    },
+    "4": {
+      "value": "16px",
+      "type": "spacing"
+    },
+    "5": {
+      "value": "20px",
+      "type": "spacing"
+    },
+    "6": {
+      "value": "24px",
+      "type": "spacing"
+    },
+    "8": {
+      "value": "32px",
+      "type": "spacing"
+    },
+    "10": {
+      "value": "40px",
+      "type": "spacing"
+    },
+    "12": {
+      "value": "48px",
+      "type": "spacing"
+    },
+    "16": {
+      "value": "64px",
+      "type": "spacing"
+    },
+    "20": {
+      "value": "80px",
+      "type": "spacing"
+    },
+    "24": {
+      "value": "96px",
+      "type": "spacing"
+    }
+  },
+  "borderRadius": {
+    "none": {
+      "value": "0",
+      "type": "borderRadius"
+    },
+    "sm": {
+      "value": "4px",
+      "type": "borderRadius"
+    },
+    "md": {
+      "value": "6px",
+      "type": "borderRadius"
+    },
+    "lg": {
+      "value": "8px",
+      "type": "borderRadius"
+    },
+    "xl": {
+      "value": "12px",
+      "type": "borderRadius"
+    },
+    "2xl": {
+      "value": "16px",
+      "type": "borderRadius"
+    },
+    "full": {
+      "value": "9999px",
+      "type": "borderRadius"
+    },
+    "button": {
+      "value": "8px",
+      "type": "borderRadius",
+      "description": "Standard button border radius"
+    },
+    "input": {
+      "value": "12px",
+      "type": "borderRadius",
+      "description": "Input field border radius"
+    },
+    "card": {
+      "value": "12px",
+      "type": "borderRadius",
+      "description": "Card border radius"
+    },
+    "badge": {
+      "value": "6px",
+      "type": "borderRadius",
+      "description": "Badge border radius"
+    },
+    "avatar": {
+      "value": "50%",
+      "type": "borderRadius",
+      "description": "Circular avatar"
+    }
+  },
+  "shadows": {
+    "none": {
+      "value": "none",
+      "type": "boxShadow"
+    },
+    "xs": {
+      "value": "0 1px 2px rgba(0, 0, 0, 0.04)",
+      "type": "boxShadow"
+    },
+    "sm": {
+      "value": "0 1px 3px rgba(0, 0, 0, 0.06)",
+      "type": "boxShadow"
+    },
+    "md": {
+      "value": "0 2px 8px rgba(0, 0, 0, 0.08)",
+      "type": "boxShadow"
+    },
+    "lg": {
+      "value": "0 4px 16px rgba(0, 0, 0, 0.10)",
+      "type": "boxShadow"
+    },
+    "xl": {
+      "value": "0 8px 32px rgba(0, 0, 0, 0.12)",
+      "type": "boxShadow"
+    },
+    "input": {
+      "value": "0 1px 3px rgba(0, 0, 0, 0.06)",
+      "type": "boxShadow",
+      "description": "Shadow for input fields"
+    },
+    "dropdown": {
+      "value": "0 2px 8px rgba(0, 0, 0, 0.08)",
+      "type": "boxShadow",
+      "description": "Shadow for dropdowns"
+    },
+    "modal": {
+      "value": "0 8px 32px rgba(0, 0, 0, 0.12)",
+      "type": "boxShadow",
+      "description": "Shadow for modals"
+    },
+    "button": {
+      "value": "0 1px 2px rgba(0, 0, 0, 0.04)",
+      "type": "boxShadow",
+      "description": "Shadow for buttons"
+    }
+  },
+  "layout": {
+    "sidebar": {
+      "width": {
+        "value": "370px",
+        "type": "sizing"
+      },
+      "minWidth": {
+        "value": "280px",
+        "type": "sizing"
+      },
+      "maxWidth": {
+        "value": "480px",
+        "type": "sizing"
+      }
+    },
+    "content": {
+      "maxWidth": {
+        "value": "1200px",
+        "type": "sizing"
+      },
+      "padding": {
+        "value": "24px",
+        "type": "spacing"
+      }
+    },
+    "breakpoints": {
+      "sm": {
+        "value": "640px",
+        "type": "breakpoint"
+      },
+      "md": {
+        "value": "768px",
+        "type": "breakpoint"
+      },
+      "lg": {
+        "value": "1024px",
+        "type": "breakpoint"
+      },
+      "xl": {
+        "value": "1280px",
+        "type": "breakpoint"
+      },
+      "2xl": {
+        "value": "1536px",
+        "type": "breakpoint"
+      }
+    }
+  },
+  "icons": {
+    "size": {
+      "xs": {
+        "value": "12px",
+        "type": "sizing"
+      },
+      "sm": {
+        "value": "16px",
+        "type": "sizing"
+      },
+      "md": {
+        "value": "20px",
+        "type": "sizing"
+      },
+      "lg": {
+        "value": "24px",
+        "type": "sizing"
+      },
+      "xl": {
+        "value": "32px",
+        "type": "sizing"
+      },
+      "2xl": {
+        "value": "48px",
+        "type": "sizing"
+      },
+      "decorative": {
+        "value": "80px",
+        "type": "sizing"
+      }
+    }
+  },
+  "transitions": {
+    "duration": {
+      "fast": {
+        "value": "150ms",
+        "type": "duration"
+      },
+      "normal": {
+        "value": "250ms",
+        "type": "duration"
+      },
+      "slow": {
+        "value": "350ms",
+        "type": "duration"
+      }
+    },
+    "timing": {
+      "easeIn": {
+        "value": "cubic-bezier(0.4, 0, 1, 1)",
+        "type": "cubicBezier"
+      },
+      "easeOut": {
+        "value": "cubic-bezier(0, 0, 0.2, 1)",
+        "type": "cubicBezier"
+      },
+      "easeInOut": {
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "type": "cubicBezier"
+      }
+    }
+  },
+  "opacity": {
+    "disabled": {
+      "value": "0.5",
+      "type": "opacity"
+    },
+    "hover": {
+      "value": "0.9",
+      "type": "opacity"
+    },
+    "muted": {
+      "value": "0.7",
+      "type": "opacity"
+    }
+  }
+}
