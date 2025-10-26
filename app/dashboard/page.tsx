@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GitGraphVisualization } from "@/components/git-graph/GitGraphVisualization";
+import { GitGraphCanvas } from "@/components/git-graph/GitGraphCanvas";
 import { mockGitCommits } from "@/lib/mock-data/git-graph";
 
 export default function DashboardPage() {
@@ -19,14 +19,13 @@ export default function DashboardPage() {
             <CardTitle>Git Visualization</CardTitle>
             <CardDescription>Your commits and Claude sessions</CardDescription>
           </CardHeader>
-          <CardContent className="h-[600px] overflow-auto flex justify-start">
-            <div className="min-w-[750px] h-[1000px]">
-              <GitGraphVisualization
-                commits={mockGitCommits}
-                selectedCommitSha={null}
-                onClaudeNodeClick={() => {}}
-              />
-            </div>
+          <CardContent className="h-[600px] p-0">
+            <GitGraphCanvas
+              commits={mockGitCommits}
+              selectedCommitSha={null}
+              onClaudeNodeClick={() => {}}
+              onGitNodeClick={() => {}}
+            />
           </CardContent>
         </Card>
       </div>
