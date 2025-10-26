@@ -16,7 +16,12 @@ export const GraphEdge = memo(function GraphEdge({
   const config = GraphConfig;
 
   // Determine edge color based on connection type
-  const strokeColor = connection.toNode.type === 'claude'
+  // All connections involving Claude nodes should be orange
+  const isClaudeConnection =
+    connection.fromNode.type === 'claude' ||
+    connection.toNode.type === 'claude';
+
+  const strokeColor = isClaudeConnection
     ? config.colors.connections.claude
     : connection.type === 'merge'
     ? config.colors.connections.merge

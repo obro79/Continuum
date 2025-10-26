@@ -285,13 +285,15 @@ export class GraphLayoutEngine {
    */
   private generateClaudeNodes(layoutState: LayoutState): GraphNode[] {
     const nodes: GraphNode[] = [];
+    const CLAUDE_OFFSET_X = 120; // Horizontal offset to the right
+    const CLAUDE_OFFSET_Y = 20;  // Subtle vertical offset downward
 
     layoutState.nodes.forEach(layoutNode => {
       if (layoutNode.commit.claude_context) {
         nodes.push({
           type: 'claude',
-          x: layoutNode.x + this.config.nodeSpacing.horizontal * 2,
-          y: layoutNode.y,
+          x: layoutNode.x + CLAUDE_OFFSET_X,
+          y: layoutNode.y + CLAUDE_OFFSET_Y,
           commit: layoutNode.commit,
           context: layoutNode.commit.claude_context,
         });
@@ -311,47 +313,110 @@ export class GraphLayoutEngine {
   ): ConnectionPath[] {
     const connections: ConnectionPath[] = [];
 
-    // Git-to-Git connections
+    // Git-to-Git connections (child to parent - each node points to its parent)
     layoutState.nodes.forEach(layoutNode => {
-      layoutNode.children.forEach(childSha => {
-        const childNode = layoutState.nodes.get(childSha);
-        if (childNode) {
+      // Only create connection if this node has a parent
+      if (layoutNode.commit.parent_sha) {
+        const parentNode = layoutState.nodes.get(layoutNode.commit.parent_sha);
+        if (parentNode) {
           const fromNode = gitNodes.find(n => n.commit?.commit_sha === layoutNode.commit.commit_sha);
-          const toNode = gitNodes.find(n => n.commit?.commit_sha === childSha);
+          const toNode = gitNodes.find(n => n.commit?.commit_sha === layoutNode.commit.parent_sha);
 
           if (fromNode && toNode) {
             const path = this.generatePath(
               fromNode.x, fromNode.y,
               toNode.x, toNode.y,
-              layoutNode.lane === childNode.lane
+              layoutNode.lane === parentNode.lane
             );
 
             connections.push({
-              type: layoutNode.lane === childNode.lane ? 'vertical' : 'branch',
+              type: layoutNode.lane === parentNode.lane ? 'vertical' : 'branch',
               d: path,
               fromNode,
               toNode,
             });
           }
         }
-      });
+      }
     });
 
-    // Git-to-Claude connections
-    gitNodes.forEach(gitNode => {
-      const claudeNode = claudeNodes.find(
-        cn => cn.commit?.commit_sha === gitNode.commit?.commit_sha
-      );
+    // Claude connections based on session flow
+    for (let i = 0; i < claudeNodes.length; i++) {
+      const claudeNode = claudeNodes[i];
+      const gitNode = gitNodes.find(gn => gn.commit?.commit_sha === claudeNode.commit?.commit_sha);
 
-      if (claudeNode) {
+      if (!gitNode || !claudeNode.context) continue;
+
+      // Check if this is a new session (Git → Claude branch)
+      if (claudeNode.context.new_session) {
+        // Git → Claude: Branch connection when new session starts
+        const path = this.generateCurvePath(
+          gitNode.x, gitNode.y,
+          claudeNode.x, claudeNode.y,
+          'right-down'
+        );
         connections.push({
           type: 'branch',
-          d: `M ${gitNode.x} ${gitNode.y} L ${claudeNode.x} ${claudeNode.y}`,
+          d: path,
           fromNode: gitNode,
           toNode: claudeNode,
         });
       }
-    });
+
+      // Check for Claude → Claude vertical connection
+      // Find the Git node for this Claude node to check commit order
+      const currentGitIndex = gitNodes.findIndex(gn => gn.commit?.commit_sha === claudeNode.commit?.commit_sha);
+
+      if (currentGitIndex > 0) {
+        // Look for the previous Git commit (parent)
+        const currentCommit = gitNodes[currentGitIndex].commit;
+        if (currentCommit?.parent_sha) {
+          // Find Claude node for the parent commit
+          const parentClaudeNode = claudeNodes.find(cn =>
+            cn.commit?.commit_sha === currentCommit.parent_sha
+          );
+
+          // Only connect if: same context_id AND actually parent-child in Git
+          if (!claudeNode.context.new_session && parentClaudeNode &&
+              parentClaudeNode.context?.context_id === claudeNode.context.context_id) {
+            // Claude → Claude: Vertical connection for continuing session
+            connections.push({
+              type: 'vertical',
+              d: `M ${parentClaudeNode.x} ${parentClaudeNode.y} L ${claudeNode.x} ${claudeNode.y}`,
+              fromNode: parentClaudeNode,
+              toNode: claudeNode,
+            });
+          }
+        }
+      }
+
+      // Check for Claude → Git merge connection
+      // This happens when a session ends (next commit has new_session: true or no context)
+      if (i < claudeNodes.length - 1 || i === claudeNodes.length - 1) {
+        const nextCommitIndex = gitNodes.findIndex(gn => gn.commit?.commit_sha === claudeNode.commit?.commit_sha) + 1;
+
+        if (nextCommitIndex < gitNodes.length) {
+          const nextGitNode = gitNodes[nextCommitIndex];
+          const nextClaudeNode = claudeNodes.find(cn => cn.commit?.commit_sha === nextGitNode.commit?.commit_sha);
+
+          // Session ends if: next has no Claude context OR next starts a new session
+          if (!nextClaudeNode || nextClaudeNode.context?.new_session) {
+            // Claude → Git: Merge connection when session ends
+            const path = this.generateCurvePath(
+              claudeNode.x, claudeNode.y,
+              nextGitNode.x, nextGitNode.y,
+              'left-down'
+            );
+            connections.push({
+              type: 'merge',
+              d: path,
+              fromNode: claudeNode,
+              toNode: nextGitNode,
+            });
+          }
+        }
+      }
+    }
 
     return connections;
   }
@@ -371,6 +436,27 @@ export class GraphLayoutEngine {
       // Bezier curve for branch connections
       const controlPointY = (y1 + y2) / 2;
       return `M ${x1} ${y1} C ${x1} ${controlPointY}, ${x2} ${controlPointY}, ${x2} ${y2}`;
+    }
+  }
+
+  /**
+   * Generate curved path for Claude connections
+   */
+  private generateCurvePath(
+    x1: number, y1: number,
+    x2: number, y2: number,
+    direction: 'right-down' | 'left-down'
+  ): string {
+    if (direction === 'right-down') {
+      // Git → Claude: Curve right and down
+      const controlX = x1 + (x2 - x1) * 0.5;
+      const controlY = y1;
+      return `M ${x1} ${y1} Q ${controlX} ${controlY}, ${x2} ${y2}`;
+    } else {
+      // Claude → Git: Curve left and down
+      const controlX = x1 - (x1 - x2) * 0.5;
+      const controlY = y1;
+      return `M ${x1} ${y1} Q ${controlX} ${controlY}, ${x2} ${y2}`;
     }
   }
 

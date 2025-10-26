@@ -15,5 +15,13 @@ export const mockProjects: Project[] = [
     bucket_name: 'continuum-contexts',
     bucket_url: 'continuum-contexts',
     created_at: '2025-01-21T14:30:00Z'
+  },
+  {
+    project_id: '660e8400-e29b-41d4-a716-446655440003',
+    user_id: 'user-123',
+    github_url: 'https://github.com/aaryan-rampal/cc-sync',
+    bucket_name: 'cc-sync-contexts',
+    bucket_url: 'cc-sync-contexts',
+    created_at: '2025-01-26T10:00:00Z'
   }
 ];

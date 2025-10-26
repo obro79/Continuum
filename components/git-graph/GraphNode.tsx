@@ -129,18 +129,21 @@ export const GraphNode = memo(function GraphNode({
       {/* Context indicator for Claude nodes */}
       {isClaudeNode && node.context && (
         <>
+          {/* "Claude" label to the right of the node */}
           <text
-            x={node.x}
+            x={node.x + visualRadius + 10 / Math.sqrt(scale)}
             y={node.y}
-            textAnchor="middle"
+            textAnchor="start"
             dominantBaseline="middle"
-            fill="white"
-            fontSize={14 / Math.sqrt(scale)}
-            fontWeight="bold"
+            fill={fillColor}
+            fontSize={config.text.commitSha.fontSize / Math.sqrt(scale)}
+            fontFamily={config.text.commitSha.fontFamily}
+            fontWeight="600"
             pointerEvents="none"
           >
-            AI
+            Claude
           </text>
+          {/* Message count on hover */}
           {(isHovered || isSelected) && (
             <text
               x={node.x}
