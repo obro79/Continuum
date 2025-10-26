@@ -170,11 +170,7 @@ CREATE POLICY "Users can read members of their projects"
     EXISTS (
       SELECT 1 FROM projects
       WHERE projects.project_id = project_members.project_id
-      AND (projects.user_id = auth.uid() OR EXISTS (
-        SELECT 1 FROM project_members pm
-        WHERE pm.project_id = projects.project_id
-        AND pm.user_id = auth.uid()
-      ))
+      AND projects.user_id = auth.uid()
     )
   );
 
@@ -205,5 +201,6 @@ CREATE POLICY "Project owners can remove members"
 - Users can only insert/delete their own contexts
 - Users can read projects they own or are members of
 - Only project owners can delete projects and manage members
+- Only project owners can view the members list (to avoid RLS recursion)
 - Project members get read and write access to the associated Supabase bucket
 - Fetch Git commit data via GitHub API using `commit_sha`
