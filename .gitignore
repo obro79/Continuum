@@ -1,0 +1,19 @@
+# Environment variables
+.env
+.env.*
+
+# IDE
+.idea/
+.vscode/
+
+# Claude Code
+.claude/
+
+# OS
+.DS_Store
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
