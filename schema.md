@@ -115,6 +115,21 @@ CREATE INDEX idx_projects_created_at ON projects(created_at DESC);
 CREATE INDEX idx_project_members_user_id ON project_members(user_id);
 CREATE INDEX idx_project_members_project_id ON project_members(project_id);
 
+-- Helper function to avoid RLS recursion
+CREATE OR REPLACE FUNCTION is_project_member(project_uuid UUID, user_uuid UUID)
+RETURNS BOOLEAN
+LANGUAGE SQL
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM project_members
+    WHERE project_id = project_uuid
+    AND user_id = user_uuid
+  );
+$$;
+
 -- Enable RLS
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contexts ENABLE ROW LEVEL SECURITY;
@@ -148,11 +163,7 @@ CREATE POLICY "Users can read projects they own or are members of"
   ON projects FOR SELECT
   USING (
     auth.uid() = user_id OR
-    EXISTS (
-      SELECT 1 FROM project_members
-      WHERE project_members.project_id = projects.project_id
-      AND project_members.user_id = auth.uid()
-    )
+    is_project_member(project_id, auth.uid())
   );
 
 CREATE POLICY "Users can insert own projects"
@@ -201,6 +212,7 @@ CREATE POLICY "Project owners can remove members"
 - Users can only insert/delete their own contexts
 - Users can read projects they own or are members of
 - Only project owners can delete projects and manage members
-- Only project owners can view the members list (to avoid RLS recursion)
+- Only project owners can view the members list
+- Uses security definer function `is_project_member()` to avoid RLS recursion
 - Project members get read and write access to the associated Supabase bucket
 - Fetch Git commit data via GitHub API using `commit_sha`
