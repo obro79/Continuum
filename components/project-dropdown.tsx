@@ -74,7 +74,7 @@ export function ProjectDropdown({ selectedProject, onProjectSelect }: ProjectDro
               <div className="flex flex-col gap-1 w-full">
                 <span className="font-medium">{project.name}</span>
                 <span className="text-xs text-muted-foreground truncate">
-                  {project.repo_link}
+                  {project.github_link}
                 </span>
               </div>
             </DropdownMenuItem>
