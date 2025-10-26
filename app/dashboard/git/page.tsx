@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GitGraphVisualization } from "@/components/git-graph/GitGraphVisualization";
+//import { GitGraphVisualization } from "@/components/git-graph/GitGraphVisualization";
 import { mockGitCommits } from "@/lib/mock-data/git-graph";
 import { Badge } from "@/components/ui/badge";
 import { ConversationView } from "@/components/chat/ConversationView";
 import { getConversation } from "@/lib/mock-data/conversations";
 import { ProjectDropdown } from "@/components/project-dropdown";
-import { GitCommit } from "@/lib/types/git-graph";
 import { Project } from "@/lib/mock-data/projects";
 import { GitGraphCanvas } from "@/components/git-graph/GitGraphCanvas";
 import { GitCommit } from "@/lib/types/git-graph";
@@ -21,7 +20,6 @@ export default function GitPage() {
   const [selectedBranch, setSelectedBranch] = useState('HEAD');
   const [selectedCommitSha, setSelectedCommitSha] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [commits, setCommits] = useState<GitCommit[]>(mockGitCommits);
   const [isLoading, setIsLoading] = useState(false);
 
   // Fetch git data when project is selected
@@ -131,12 +129,15 @@ export default function GitPage() {
           <p className="text-muted-foreground">
             Visualizing Git commits with Claude conversation contexts
           </p>
+          <div className="mt-4">
+            <ProjectDropdown
+              selectedProject={selectedProject}
+              onProjectSelect={setSelectedProject}
+            />
+          </div>
         </div>
-        <ProjectDropdown
-          selectedProject={selectedProject}
-          onProjectSelect={setSelectedProject}
-        />
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-3 items-center">
+          <div className="h-8 w-px bg-border" />
           <button
             onClick={() => setViewMode('all')}
             className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
