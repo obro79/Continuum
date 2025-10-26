@@ -124,17 +124,17 @@ export default function GitPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Git Status</h2>
-        <p className="text-muted-foreground">
-          Visualizing Git commits with Claude conversation contexts
-        </p>
-        <div className="mt-4">
-          <ProjectDropdown
-            selectedProject={selectedProject}
-            onProjectSelect={setSelectedProject}
-          />
+      <div className="flex justify-between items-start">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight">Git Status</h2>
+          <p className="text-muted-foreground">
+            Visualizing Git commits with Claude conversation contexts
+          </p>
         </div>
+        <ProjectDropdown
+          selectedProject={selectedProject}
+          onProjectSelect={setSelectedProject}
+        />
       </div>
       {/* Full height graph container - takes entire content area */}
       <div className="flex flex-col h-[calc(100vh-10rem)]">
