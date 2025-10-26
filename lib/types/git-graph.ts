@@ -14,6 +14,8 @@ export interface GitCommit {
   commit_message: string;
   author_email: string;
   timestamp: string;
+  parent_sha: string | null; // Parent commit SHA (for branching)
+  branches?: string[]; // Branches that contain this commit
   claude_context: ClaudeContext | null; // null if no context (e.g., commit 7)
 }
 

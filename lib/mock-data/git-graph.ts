@@ -17,6 +17,7 @@ export const mockGitCommits: GitCommit[] = [
     commit_message: 'Add user authentication system',
     author_email: 'dev@example.com',
     timestamp: '2025-01-20T10:00:00Z',
+    parent_sha: null, // First commit
     claude_context: {
       context_id: 'ctx-550e8400',
       total_messages: 10,
@@ -29,6 +30,7 @@ export const mockGitCommits: GitCommit[] = [
     commit_message: 'Refactor auth middleware',
     author_email: 'dev@example.com',
     timestamp: '2025-01-20T11:30:00Z',
+    parent_sha: 'abc123def456789012345678901234567890abcd',
     claude_context: {
       context_id: 'ctx-550e8400',
       total_messages: 8,
@@ -41,6 +43,7 @@ export const mockGitCommits: GitCommit[] = [
     commit_message: 'Add password reset functionality',
     author_email: 'dev@example.com',
     timestamp: '2025-01-20T14:00:00Z',
+    parent_sha: 'def456abc789012345678901234567890abcdef1',
     claude_context: {
       context_id: 'ctx-550e8400',
       total_messages: 5,
@@ -53,6 +56,7 @@ export const mockGitCommits: GitCommit[] = [
     commit_message: 'Implement email notifications',
     author_email: 'dev@example.com',
     timestamp: '2025-01-20T16:00:00Z',
+    parent_sha: '789012def456abc123456789012345678901abcd',
     claude_context: {
       context_id: 'ctx-660e8400',
       total_messages: 6,
@@ -65,6 +69,7 @@ export const mockGitCommits: GitCommit[] = [
     commit_message: 'Add notification preferences',
     author_email: 'dev@example.com',
     timestamp: '2025-01-20T17:30:00Z',
+    parent_sha: '012345abc789def456012345678901234567890ab',
     claude_context: {
       context_id: 'ctx-660e8400',
       total_messages: 4,
@@ -77,6 +82,7 @@ export const mockGitCommits: GitCommit[] = [
     commit_message: 'Fix notification timing bug',
     author_email: 'dev@example.com',
     timestamp: '2025-01-20T19:00:00Z',
+    parent_sha: '345678def012abc456789012345678901234567ab',
     claude_context: {
       context_id: 'ctx-770e8400',
       total_messages: 4,
@@ -89,6 +95,7 @@ export const mockGitCommits: GitCommit[] = [
     commit_message: 'Update dependencies',
     author_email: 'dev@example.com',
     timestamp: '2025-01-20T20:00:00Z',
+    parent_sha: '678901abc345def012789012345678901234567ab',
     claude_context: null, // No context - merge session 3, no branch out
   },
 ];
