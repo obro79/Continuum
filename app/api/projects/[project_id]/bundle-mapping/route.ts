@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { promises as fs } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -43,13 +42,10 @@ export async function GET(
       );
     }
 
-    // Create service role client for storage access
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    const serviceClient = createServiceClient(supabaseUrl, serviceRoleKey);
-
-    // Download repo.bundle from Supabase Storage
-    const { data: bundleData, error: downloadError } = await serviceClient
+    // Download repo.bundle from Supabase Storage using the signed-in user's
+    // session. RLS on storage.objects (scoped to the bucket owner) authorizes
+    // the download, so no privileged server-side key is needed.
+    const { data: bundleData, error: downloadError } = await supabase
       .storage
       .from(project.bucket_name)
       .download("repo.bundle");
