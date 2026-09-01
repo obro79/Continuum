@@ -30,75 +30,12 @@ export async function POST(request: NextRequest) {
     }
 
     const normalizedUrl = normalizeGithubUrl(githubUrl);
-
-    // Check if project already exists
-    const { data: existingProject } = await supabase
-      .from("projects")
-      .select("project_id")
-      .eq("github_url", normalizedUrl)
-      .single();
-
-    if (existingProject) {
-      return NextResponse.json(
-        { error: "Project with this GitHub URL already exists" },
-        { status: 409 }
-      );
-    }
-
-    // Generate bucket name
     const bucketName = sanitizeGithubUrlToBucketName(normalizedUrl);
+    const bucketUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucketName}`;
 
-    // Create Supabase storage bucket using Admin API
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-    if (!serviceRoleKey) {
-      console.error("SUPABASE_SERVICE_ROLE_KEY is not set");
-      return NextResponse.json(
-        { error: "Server configuration error" },
-        { status: 500 }
-      );
-    }
-
-    // Create the bucket
-    const bucketResponse = await fetch(
-      `${supabaseUrl}/storage/v1/bucket`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${serviceRoleKey}`,
-          apikey: serviceRoleKey,
-        },
-        body: JSON.stringify({
-          name: bucketName,
-          public: false,
-          file_size_limit: 52428800, // 50MB
-          allowed_mime_types: null,
-        }),
-      }
-    );
-
-    if (!bucketResponse.ok) {
-      const errorData = await bucketResponse.json();
-      console.error("Failed to create bucket:", errorData);
-
-      // Check if bucket already exists
-      if (errorData.message?.includes("already exists")) {
-        // Continue with existing bucket
-        console.log("Bucket already exists, continuing...");
-      } else {
-        return NextResponse.json(
-          { error: "Failed to create storage bucket" },
-          { status: 500 }
-        );
-      }
-    }
-
-    // Construct bucket URL
-    const bucketUrl = `${supabaseUrl}/storage/v1/object/public/${bucketName}`;
-
-    // Insert project into database
+    // Insert the project. The storage bucket is created by a database trigger
+    // (see supabase/migrations), so no privileged server-side key is needed
+    // here - RLS policies scope the insert to the signed-in owner.
     const { data: project, error: insertError } = await supabase
       .from("projects")
       .insert({
@@ -111,6 +48,14 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
+      // github_url and bucket_name are unique; a duplicate is a user-facing conflict
+      if (insertError.code === "23505") {
+        return NextResponse.json(
+          { error: "Project with this GitHub URL already exists" },
+          { status: 409 }
+        );
+      }
+
       console.error("Failed to insert project:", insertError);
       return NextResponse.json(
         { error: "Failed to create project" },
