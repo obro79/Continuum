@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Continuum
 
-## Getting Started
+**Version control for your AI pair-programming context: Claude Code conversations captured at every git commit, restorable when you check out old code.**
 
-First, run the development server:
+![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=000)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-Postgres-3FCF8E?logo=supabase&logoColor=white)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+<!-- DEMO GIF: record the dashboard graph view (blue commit timeline + orange Claude context nodes) and embed it here -->
+
+> **Core idea:** git handles branching; Continuum handles the conversation that happened between commit A and commit B.
+
+## What It Does
+
+- Links the Claude Code sessions that produced each commit to that commit's SHA.
+- Merges multiple sessions between two commits into one thread, with clear session boundaries.
+- Visualizes commits and Claude contexts together as an interactive SVG graph in a project dashboard.
+- Designed so you can check out an old commit and pick up the conversation that led to it.
+
+**Status:** the dashboard, graph and data model are built. Automatic capture through a git pre-commit hook is the next step (see [TECHNICAL_OVERVIEW.md](TECHNICAL_OVERVIEW.md)).
+
+## Architecture
+
+```mermaid
+flowchart LR
+    CC[~/.claude/projects session JSONL] --> MG[session merger]
+    MG -->|conversation JSONL| SB[(Supabase: contexts)]
+    MG -->|context_id reference| SNAP[.cc-snapshots/commit-sha/metadata.json]
+    SNAP --> GIT[git repository]
+    GIT --> UI[Next.js dashboard]
+    SB --> UI
+    UI --> GRAPH[commit + context graph]
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Conversation bodies live in Supabase so repositories stay light; only small metadata references are committed under `.cc-snapshots/`. Local state lives in a gitignored `.cc-context/`. See [TECHNICAL_OVERVIEW.md](TECHNICAL_OVERVIEW.md) and [tech_design.md](tech_design.md) for the full design, including session-merging rules and graph layout.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Next.js 16 (App Router, React Server Components) and React 19 with the React Compiler
+- TypeScript (strict), Tailwind CSS 4, Radix UI, React Hook Form + Zod
+- Supabase (Postgres, auth, row-level security)
 
-## Learn More
+## Run Locally
 
-To learn more about Next.js, take a look at the following resources:
+Prerequisites: Node.js 20+ and a Supabase project.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm install
+cp .env.example .env.local   # fill in the values below
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Variable | Purpose |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase client |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-side database access |
+| `GITHUB_TOKEN` | Reading repository commit history |
+| `ANTHROPIC_API_KEY` | Claude features |
 
-## Deploy on Vercel
+Apply the schema in [schema.md](schema.md) to your Supabase project, then open [http://localhost:3000](http://localhost:3000).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Layout
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+app/          routes: auth, dashboard, projects API
+components/   git-graph (SVG nodes and connections), chat, projects
+lib/          Supabase clients, graph layout, types, design tokens
+docs/         chat-history parser plan
+```
+
+## Team
+
+Built by [Owen Fisher](https://github.com/obro79), Aaryan Rampal and Derek Chu.
