@@ -18,21 +18,25 @@ interface Project {
 export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const [error, setError] = useState<string | null>(null);
 
   const fetchProjects = async () => {
     try {
       setIsLoading(true);
+      setError(null);
       const response = await fetch("/api/projects");
       const data = await response.json();
 
       if (response.ok) {
         setProjects(data.projects || []);
       } else {
-        toast.error("Failed to load projects");
+        const message = data.error || "Failed to load projects";
+        setError(message);
+        toast.error(message);
       }
-    } catch (error) {
-      console.error("Error fetching projects:", error);
+    } catch (err) {
+      console.error("Error fetching projects:", err);
+      setError("An error occurred while loading projects");
       toast.error("An error occurred while loading projects");
     } finally {
       setIsLoading(false);
@@ -82,6 +86,17 @@ export default function DashboardPage() {
         <div className="text-center py-12">
           <p className="text-muted-foreground">Loading projects...</p>
         </div>
+      ) : error ? (
+        <div className="text-center py-12">
+          <p className="text-destructive mb-4">{error}</p>
+          <button
+            type="button"
+            onClick={fetchProjects}
+            className="text-sm text-primary hover:underline"
+          >
+            Try again
+          </button>
+        </div>
       ) : projects.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-muted-foreground mb-4">
@@ -98,7 +113,6 @@ export default function DashboardPage() {
               bucketName={project.bucket_name}
               bucketUrl={project.bucket_url}
               createdAt={project.created_at}
-              supabaseUrl={supabaseUrl}
               onDelete={project.is_owner ? handleDeleteProject : undefined}
             />
           ))}
